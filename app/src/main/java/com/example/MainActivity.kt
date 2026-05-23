@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,9 +20,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
+            val operatorViewModel: OperatorViewModel = viewModel()
+            val useDarkTheme = when (operatorViewModel.appTheme.collectAsState(initial = "system").value) {
+                "dark" -> true
+                "light" -> false
+                else -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
+            MyApplicationTheme(darkTheme = useDarkTheme, dynamicColor = false) {
                 val navController = rememberNavController()
-                val operatorViewModel: OperatorViewModel = viewModel()
                 NavHost(navController = navController, startDestination = "login") {
                     composable("login") {
                         LoginScreen(
