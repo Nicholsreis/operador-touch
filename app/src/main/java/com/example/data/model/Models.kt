@@ -13,11 +13,30 @@ data class User(val id: Int, val nome: String, val perfil: String)
 
 @JsonClass(generateAdapter = true)
 data class FilaResponse(
-    val id: Int,
-    val senha: String,
-    val prioridade: Boolean,
+    @com.squareup.moshi.Json(name = "id") val rawId: Int? = null,
+    @com.squareup.moshi.Json(name = "senha") val rawSenha: String? = null,
+    val numero: Any? = null,
+    @com.squareup.moshi.Json(name = "prioridade") val rawPrioridade: Boolean? = null,
+    val preferencial: Any? = null,
+    @com.squareup.moshi.Json(name = "status") val rawStatus: String? = null,
+    val success: Boolean? = null,
+    val data: FilaResponse? = null
+) {
+    val id: Int
+        get() = rawId ?: data?.id ?: 0
+
+    val senha: String
+        get() = rawSenha ?: numero?.toString() ?: data?.senha ?: rawId?.toString() ?: ""
+
+    val prioridade: Boolean
+        get() = rawPrioridade == true || data?.prioridade == true || run {
+            val prefStr = preferencial?.toString() ?: data?.preferencial?.toString() ?: ""
+            prefStr == "1" || prefStr == "1.0" || prefStr.lowercase() == "true"
+        }
+
     val status: String
-)
+        get() = rawStatus ?: data?.status ?: ""
+}
 
 @JsonClass(generateAdapter = true)
 data class ChamadaRequest(

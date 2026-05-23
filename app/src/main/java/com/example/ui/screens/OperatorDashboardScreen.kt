@@ -368,48 +368,29 @@ fun OperatorDashboardScreen(
                 }
 
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    val isTablet = maxWidth > 720.dp
+                    val isLandscape = maxWidth > maxHeight
 
-                    if (isTablet) {
-                        // Wide layouts
+                    if (isLandscape) {
+                        // Clone perfeito da tela "ControleTouch.tsx" do ChamaAí em horizontal
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(16.dp),
+                                .padding(12.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            // Lado Esquerdo - Painel de Atendimento e Estatísticas (50% de largura)
                             Box(
                                 modifier = Modifier
-                                    .weight(0.40f)
+                                    .weight(0.5f)
                                     .fillMaxHeight()
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(dynamicSurface)
-                                    .border(1.dp, dynamicBorder, RoundedCornerShape(20.dp))
-                                    .padding(16.dp)
-                            ) {
-                                FilaListSection(
-                                    fila = fila,
-                                    onRefresh = { viewModel.carregarFila() },
-                                    isDark = isDark,
-                                    textPrimary = textPrimary,
-                                    textSecondary = textSecondary,
-                                    dynamicBorder = dynamicBorder,
-                                    dynamicBackground = dynamicBackground
-                                )
-                            }
-
-                            Column(
-                                modifier = Modifier
-                                    .weight(0.60f)
-                                    .fillMaxHeight(),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 ActiveTicketDisplayCard(
                                     ultimoChamado = ultimoChamado,
+                                    fila = fila,
                                     guiche = guiche,
                                     onRepetir = { viewModel.repetirChamada() },
                                     onEstornar = { viewModel.iniciarEstorno() },
-                                    modifier = Modifier.weight(0.45f),
+                                    modifier = Modifier.fillMaxSize(),
                                     isDark = isDark,
                                     textPrimary = textPrimary,
                                     textSecondary = textSecondary,
@@ -417,14 +398,120 @@ fun OperatorDashboardScreen(
                                     dynamicBorder = dynamicBorder,
                                     dynamicBackground = dynamicBackground
                                 )
+                            }
 
-                                GiantCallButtonCard(
-                                    onClick = { viewModel.chamarProximo() },
-                                    enabled = estaOnline && !isPausado,
-                                    isPausado = isPausado,
-                                    isDark = isDark,
-                                    modifier = Modifier.weight(0.55f)
-                                )
+                            // Lado Direito - Botoeira Gigante de Ação (50% de largura)
+                            Column(
+                                modifier = Modifier
+                                    .weight(0.5f)
+                                    .fillMaxHeight(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                // 1. Botão PRÓXIMO (Emerald/Verde - Ocupa 50% de altura)
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (estaOnline && !isPausado) Color(0xFF059669) else Color(0xFF9CA3AF)
+                                    ),
+                                    shape = RoundedCornerShape(16.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = if (estaOnline && !isPausado) 6.dp else 0.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(0.50f)
+                                        .clickable(enabled = estaOnline && !isPausado) { viewModel.chamarProximo() }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Campaign,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(40.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Text(
+                                            text = "PRÓXIMO",
+                                            color = Color.White,
+                                            fontSize = 28.sp,
+                                            fontWeight = FontWeight.Black,
+                                            letterSpacing = 2.sp
+                                        )
+                                    }
+                                }
+
+                                // 2. Botão REPETIR (Azul - Ocupa 30% de altura)
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (estaOnline && !isPausado && ultimoChamado != null) Color(0xFF2563EB) else Color(0xFF94A3B8)
+                                    ),
+                                    shape = RoundedCornerShape(16.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = if (estaOnline && !isPausado && ultimoChamado != null) 4.dp else 0.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(0.30f)
+                                        .clickable(enabled = estaOnline && !isPausado && ultimoChamado != null) { viewModel.repetirChamada() }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxSize().padding(12.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(30.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Text(
+                                            text = "REPETIR",
+                                            color = Color.White,
+                                            fontSize = 22.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 1.5.sp
+                                        )
+                                    }
+                                }
+
+                                // 3. Botão DEVOLVER À FILA (Branco / Amber - Ocupa 20% de altura)
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (isDark) SlateSurface else Color.White
+                                    ),
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(0.20f)
+                                        .border(
+                                            2.dp,
+                                            if (ultimoChamado != null) Color(0xFFD97706) else Color(0xFFE2E8F0),
+                                            RoundedCornerShape(16.dp)
+                                        )
+                                        .clickable(enabled = ultimoChamado != null) { viewModel.iniciarEstorno() }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxSize().padding(10.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Undo,
+                                            contentDescription = null,
+                                            tint = if (ultimoChamado != null) Color(0xFFD97706) else Color(0xFF94A3B8),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "DEVOLVER À FILA",
+                                            color = if (ultimoChamado != null) Color(0xFFD97706) else Color(0xFF94A3B8),
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 1.sp
+                                        )
+                                    }
+                                }
                             }
                         }
                     } else {
@@ -439,6 +526,7 @@ fun OperatorDashboardScreen(
                         ) {
                             ActiveTicketDisplayCard(
                                 ultimoChamado = ultimoChamado,
+                                fila = fila,
                                 guiche = guiche,
                                 onRepetir = { viewModel.repetirChamada() },
                                 onEstornar = { viewModel.iniciarEstorno() },
@@ -862,6 +950,7 @@ fun FilaItemCard(
 @Composable
 fun ActiveTicketDisplayCard(
     ultimoChamado: FilaResponse?,
+    fila: List<FilaResponse>,
     guiche: String,
     onRepetir: () -> Unit,
     onEstornar: () -> Unit,
@@ -873,6 +962,10 @@ fun ActiveTicketDisplayCard(
     dynamicBorder: Color,
     dynamicBackground: Color
 ) {
+    val filaGeralCount = fila.count { !it.prioridade }
+    val filaPrioritariaCount = fila.count { it.prioridade }
+    val filaTotalCount = fila.size
+
     Card(
         colors = CardDefaults.cardColors(containerColor = dynamicSurface),
         shape = RoundedCornerShape(20.dp),
@@ -895,97 +988,198 @@ fun ActiveTicketDisplayCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (ultimoChamado != null) {
-                // Large styled ticket text
-                Text(
-                    text = ultimoChamado.senha,
-                    color = if (ultimoChamado.prioridade) AmberOrange else (if (isDark) TealAccentLight else TealAccent),
-                    fontSize = 54.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.sp
-                )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (ultimoChamado != null) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        // Large styled ticket text
+                        Text(
+                            text = ultimoChamado.senha,
+                            color = if (ultimoChamado.prioridade) AmberOrange else (if (isDark) TealAccentLight else TealAccent),
+                            fontSize = 54.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp
+                        )
 
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(30.dp))
-                        .background(dynamicBackground)
-                        .padding(horizontal = 14.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(30.dp))
+                                .background(dynamicBackground)
+                                .padding(horizontal = 14.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (ultimoChamado.prioridade) Icons.Default.Star else Icons.Default.EventSeat,
+                                contentDescription = null,
+                                tint = if (ultimoChamado.prioridade) AmberOrange else (if (isDark) TealAccentLight else TealAccent),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (ultimoChamado.prioridade) "Preferencial" else "Convencional",
+                                color = textPrimary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Control buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Repetir Chamada
+                            Button(
+                                onClick = onRepetir,
+                                colors = ButtonDefaults.buttonColors(containerColor = if (isDark) SlateBorder else Color(0xFFE2E8F0)),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
+                            ) {
+                                Icon(Icons.Default.VolumeUp, contentDescription = null, tint = textPrimary)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Repetir", color = textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+
+                            // Estornar
+                            Button(
+                                onClick = onEstornar,
+                                colors = ButtonDefaults.buttonColors(containerColor = CoralRed.copy(alpha = 0.15f)),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
+                                    .border(1.dp, CoralRed, RoundedCornerShape(12.dp))
+                            ) {
+                                Icon(Icons.Default.Undo, contentDescription = null, tint = CoralRed)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Estornar", color = CoralRed, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "---",
+                            color = if (isDark) SlateBorder else Color(0xFFCBD5E1),
+                            fontSize = 54.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(30.dp))
+                                .background(dynamicBackground)
+                                .padding(horizontal = 14.dp, vertical = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "AGUARDANDO",
+                                color = textSecondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Counters layout - GERAL, PRIORITÁRIO, TOTAL
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Geral
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = dynamicBackground),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.weight(1f).border(1.dp, dynamicBorder, RoundedCornerShape(12.dp))
                 ) {
-                    Icon(
-                        imageVector = if (ultimoChamado.prioridade) Icons.Default.Star else Icons.Default.EventSeat,
-                        contentDescription = null,
-                        tint = if (ultimoChamado.prioridade) AmberOrange else (if (isDark) TealAccentLight else TealAccent),
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (ultimoChamado.prioridade) "Preferencial" else "Convencional",
-                        color = textPrimary,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "$filaGeralCount",
+                            color = Color(0xFF2563EB), // Blue
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "GERAL",
+                            color = textSecondary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Control buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                // Prioritário
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = dynamicBackground),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.weight(1f).border(1.dp, dynamicBorder, RoundedCornerShape(12.dp))
                 ) {
-                    // Repetir Chamada
-                    Button(
-                        onClick = onRepetir,
-                        colors = ButtonDefaults.buttonColors(containerColor = if (isDark) SlateBorder else Color(0xFFE2E8F0)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(Icons.Default.VolumeUp, contentDescription = null, tint = textPrimary)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Repetir", color = textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-
-                    // Estornar
-                    Button(
-                        onClick = onEstornar,
-                        colors = ButtonDefaults.buttonColors(containerColor = CoralRed.copy(alpha = 0.15f)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .border(1.dp, CoralRed, RoundedCornerShape(12.dp))
-                    ) {
-                        Icon(Icons.Default.Undo, contentDescription = null, tint = CoralRed)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Estornar", color = CoralRed, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "$filaPrioritariaCount",
+                            color = Color(0xFFD97706), // Amber
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "PRIORITÁRIO",
+                            color = textSecondary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
-            } else {
-                Spacer(modifier = Modifier.height(16.dp))
-                Icon(
-                    imageVector = Icons.Default.SentimentNeutral,
-                    contentDescription = null,
-                    tint = if (isDark) SlateBorder else Color(0xFFCBD5E1),
-                    modifier = Modifier.size(64.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Aguardando chamada",
-                    color = textSecondary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Toque no botão 'CHAMAR PRÓXIMO' para receber o próximo cliente",
-                    color = textSecondary.copy(alpha = 0.7f),
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+
+                // Total
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = dynamicBackground),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.weight(1f).border(1.dp, dynamicBorder, RoundedCornerShape(12.dp))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "$filaTotalCount",
+                            color = textPrimary,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "TOTAL",
+                            color = textSecondary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
         }
     }
