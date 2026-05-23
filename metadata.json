@@ -1,0 +1,6 @@
+{
+  "name": "ChamaAí Operador Touch",
+  "description": "Aplicativo para operadores chamarem senhas do painel e gerenciarem fila local.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
