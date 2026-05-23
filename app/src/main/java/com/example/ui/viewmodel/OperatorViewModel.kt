@@ -138,7 +138,7 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
         filaJob = viewModelScope.launch {
             while (true) {
                 val token = authToken.value
-                if (token != null && estaOnline.value) {
+                if (token != null) {
                     atualizarFilaSilenciosamente(token)
                 }
                 delay(3000)
@@ -150,10 +150,19 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 NetworkClient.dynamicUrlInterceptor.setBaseUrl(serverIp.value)
-                apiService.getStatus()
+                val token = authToken.value
+                if (token != null) {
+                    apiService.getFila("Bearer $token")
+                } else {
+                    apiService.getStatus()
+                }
                 _estaOnline.value = true
             } catch (e: Exception) {
-                _estaOnline.value = false
+                if (e is retrofit2.HttpException) {
+                    _estaOnline.value = true
+                } else {
+                    _estaOnline.value = false
+                }
             }
         }
     }
